@@ -52,20 +52,28 @@ namespace GeneticAlgorithm
                 }
             }
         }
-
+        private Guid GetIdOfRandomChromosome()
+        {
+            return Individuals[Random.Next() % Individuals.Count()].Id;
+        }
         private Guid GetIdOfChromosomeRoulette()
         {
             double SumFitness = Individuals.Select(x => x.Fitness).Sum();
             int random = Random.Next() % (int)SumFitness;
+            if (random <= 0)
+                random = 1;
             double PartialSum = 0;
             foreach (var chromosome in Individuals)
             {
                 PartialSum += chromosome.Fitness;
-                if (PartialSum < random)
+                if (PartialSum >= random)
                     return chromosome.Id;
             }
+            if (Individuals.Count > 0)
+                return GetIdOfRandomChromosome();
             return Guid.Empty;
         }
+        private 
         private void ValidateParentsId(Guid FatherId, Guid MotherId)
         {
             if (FatherId == null || MotherId == null)
@@ -111,7 +119,7 @@ namespace GeneticAlgorithm
                 ValidateParentsId(fatherId, motherId);
                 while (fatherId == motherId)
                 {
-                    motherId = GetIdOfChromosomeRoulette();
+                    motherId = GetIdOfRandomChromosome();
                     ValidateParentsId(fatherId, motherId);
                 }
                 #region CheckIfExecuteCrossover
